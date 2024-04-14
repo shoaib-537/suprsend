@@ -1,0 +1,2049 @@
+openapi: 3.0.3
+info:
+  title: Gems Ambassador
+  description: Gems Ambassador Api Documentation
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local server
+  # - url: https://stagingapi.gems.vip
+    # description: Staging Server
+
+tags:
+  - name: Auth
+    description: Auth APIs
+  - name: Temp
+    description: Temp create creator and leader from homepage side. (Unprotected apis)
+  - name: Tokens
+    description: Tokens
+  - name: metadata
+    description: metadata APIs (Reusable across multiple apis)
+  - name: Project
+    description: Project APIs 
+  # - name: Invitation
+  #   description: Users APIs 
+  
+paths:
+
+  /auth/users/creator-signup:
+    post:
+      summary: Creator SignUp for Gems
+      tags:
+        - Auth
+      requestBody:
+        description: Payload for Creator signup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: abc
+                email: 
+                  type: string
+                  example: mail1@test.com
+                password: 
+                  type: string
+                  example: Some Secret
+                walletAddress: 
+                  type: string
+                  example: 0x98765532e4568902348274298739459375439787
+
+              required:
+                - name
+                - email
+                - password
+                - walletAddress
+      responses:
+        201:
+          description: Squad invitation successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/CreatorSignupSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+  /auth/users/creator-signin:
+    post:
+      summary: Creator Signin 
+      tags:
+        - Auth
+      requestBody:
+        description: Payload for Creator signin
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: 
+                  type: string
+                  example: mail2@test.com
+                password: 
+                  type: string
+                  example: Some Secret
+                rememberMe: 
+                  type: boolean
+
+              required:
+                - name
+                - password
+                - rememberMe
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/CreatorSignInSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+  /auth/users/refresh-token:
+    post:
+      summary: generate new refresh token 
+      tags:
+        - Auth
+      requestBody:
+        description: Payload for refresh token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+              refreshToken: 
+                type: string
+                example: eTjgSbyufjI
+
+              required:
+                - refreshToken
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/RefreshTokenSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+             
+  /auth/users/forget-password:
+    post:
+      summary: Forgot password (password reset request)
+      tags:
+        - Auth
+      requestBody:
+        description: Payload for forgot password
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: abc@example.com
+                  required: true
+      responses:
+        200:
+          description: Forgot password initiation success (Password reset link sent via email)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ForgotPasswordInitiationSuccess"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UserNotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"
+
+  /auth/users/reset-password:
+    post:
+      summary: Reset password (password reset request)
+      tags:
+        - Auth
+      requestBody:
+        description: Payload for reset password
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2OTE1OTE2MDUsImV4cCI6MTY5MTU5MzQwNSwiaXNzIjoidG9taWRvcC5jb20ifQ.pl6DKOqsy1ZRRhFvpqgRqEOzHaksok7JTvZioViBbBo
+                  required: true
+                password:
+                  type: string
+                  example: "154785Qwe#"
+                  required: true
+                confirmPassword:
+                  type: string
+                  example: "154785Qwe#"
+                  required: true
+      responses:
+        200:
+          description: Reset Password success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ResetPasswordInitiationSuccess"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UserNotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"
+
+  /projects:
+    post:
+      summary: Create New Project
+      tags:
+        - Project
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for creating Project
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Project
+                detail: 
+                  type: string
+                  example: Lorem Ipseadlasm tx x his and that
+                twitterAccount: 
+                  type: string
+                  example: "@quecko123"
+                leadersCommission: 
+                  type: number
+                  example: 2.6
+                tokenContractAddress: 
+                  type: string
+                  example: 0xab6fd6074782c805933d030e80129155a2156d11
+                imageUrl: 
+                  type: string
+                  example: https://somethign.xom/7654321.png
+                bannerUrl: 
+                  type: string
+                  example: https://somethign.xom/7654321.png
+                videos: 
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      videoTitle: 
+                        type: string
+                        example: 1234sdf211
+                      videoUrl: 
+                        type: string
+                        example: wsha11t
+                      thumbnailUrl: 
+                        type: string
+                        example: 1su11rl
+                documents: 
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      documentTitle: 
+                        type: string
+                        example: s1o1msething
+                      documentUrl: 
+                        type: string
+                        example: the1 1usrl
+                      thumbnailUrl: 
+                        type: string
+                        example: us1r1l
+    
+    get:
+      summary: Get Project of Owner
+      tags:
+        - Project
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/GetProjectDetailsForOwner'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ProjectNotFound"
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+ 
+  /projects/new-round:
+    patch:
+      summary: Get Project of Owner
+      tags:
+        - Project
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for creating Project
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName: 
+                  type: string
+                  example: New round
+                salePrice: 
+                  type: integer
+                  format: int32
+                  example: 100
+                tokenSelected:
+                  type: array
+                  items:
+                    type: string
+                  example: ["61f7e1a8b9a3cd5f8c9a2b3e", "61f7e1a8b9a3cd5f8c9a2b3e"]
+                startDate: 
+                  type: string
+                  format: date-time
+                  example: 2024-04-01T00:00:00.000Z
+                endDate: 
+                  type: string
+                  format: date-time
+                  example: 2024-04-30T23:59:59.999Z
+
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/RoundCreatedSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+ 
+  /projects/rounds:
+    get:
+      summary: Tokens list
+      tags:
+        - Project
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        - in: query
+          name: orderField
+          schema:
+            type: string
+          description: apply sorting on this fields ("round", "salePrice", "startDate", "endDate")
+        - in: query
+          name: orderDirection
+          schema:
+            type: string
+          description: sorting direction ascending,descending (1,-1)
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/RoundListingSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+  /tokens:
+    post:
+      summary: Add token 
+      tags:
+        - Tokens
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for add token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Ethereum
+                symbol: 
+                  type: string
+                  example: ETH
+                decimal: 
+                  type: integer
+                  format: int32
+                  example: 1
+                slippage: 
+                  type: integer
+                  format: int32
+                  example: 1
+                address: 
+                  type: string
+                  example: 0x1234567890123456789012345678901234567891
+                projectId: 
+                  type: string
+                  example: 65f33172cc2a28d67177ef70
+                imageUrl: 
+                  type: string
+                  example: fancy.com/qsw3/png
+      responses:
+        200:
+          description: Add Token successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/AddTokenSuccess"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        401:
+          description: Unauthorized (JWT Invalid/Expired)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UnAuthorized"
+        409:
+          description: Address Already exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/AddressAlreadyExist"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError" 
+
+    get:
+      summary: Tokens list
+      tags:
+        - Tokens
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          required: true
+          description: page number
+        - in: query
+          name: projectId
+          schema:
+            type: mongo Id of project
+          required: true
+          description: To return the tokens of respective 
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        - in: query
+          name: orderField
+          schema:
+            type: string
+          description: apply sorting on this fields ('name','symbol','address','decimal','status','slippage')
+        - in: query
+          name: orderDirection
+          schema:
+            type: string
+          description: sorting direction ascending,descending (1,-1)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: search on address,symbol & name base
+        - in: query
+          name: status
+          schema:
+            type: boolean
+          description: to filter active and inactive tokens
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Tokens list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/AllTokensListing"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        401:
+          description: Unauthorized (JWT Invalid/Expired)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UnAuthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"
+
+  /tokens/{id}/toggle-status:
+    patch:
+      summary: toggle token status
+      tags:
+        - Tokens
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: MongoDB ID of the user to get
+          security:
+            - bearerAuth: []
+      responses:
+        200:
+          description: Toggle status successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ToggleStatusSuccess"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        401:
+          description: Unauthorized (JWT Invalid/Expired)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UnAuthorized"
+        404:
+          description: Token not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/TokenNotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"  
+
+  /tokens/minimal:
+    get:
+      summary: Tokens list
+      tags:
+        - Tokens
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: search on name base
+        - in: query
+          name: afterElement
+          schema:
+            type: string
+          description: scrollable pagination
+          security:
+            - bearerAuth: []
+      responses:
+        200:
+          description: Minimal Tokens list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/MinimalTokensListing"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+        401:
+          description: Unauthorized (JWT Invalid/Expired)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/UnAuthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"
+
+  /temp/leader-signup:
+    post:
+      summary: Temp Leader Signup for adding leader detail
+      tags:
+        - Temp
+
+      requestBody:
+        description: Payload for temp Leader signup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName: 
+                  type: string
+                  example: John
+                twitterLink: 
+                  type: string
+                  example: johndoe
+                telegramLink: 
+                  type: string
+                  example: https://t.me/exampleChannel
+                country: 
+                  type: string
+                  example: America
+                language: 
+                  type: string
+                  example: English
+                email: 
+                  type: string
+                  example: example@example.com
+
+              required:
+                - nickName
+                - twitterLink
+                - telegramLink
+                - country
+                - language
+                - email
+      responses:
+        201:
+          description: Squad invitation successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/TempLeaderSignupSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+  /temp/creator-signup:
+    post:
+      summary: Temp creator Signup for adding creator detail
+      tags:
+        - Temp
+      requestBody:
+        description: Payload for creator signup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectName: 
+                  type: string
+                  example: Example Project
+                companySize: 
+                  type: string
+                  example: 10-50
+                projectIndustry: 
+                  type: string
+                  example: Artificial Intelligence
+                website: 
+                  type: string
+                  example: https://www.example.com
+                twitterLink: 
+                  type: string
+                  example: example
+                telegramLink: 
+                  type: string
+                  example: https://t.me/exampleChannel
+                projectCreatorName: 
+                  type: string
+                  example: John Doe
+                projectCreatorPosition: 
+                  type: string
+                  example: CTO
+                email: 
+                  type: string
+                  example: something@example.com
+              required:
+                - projectName
+                - companySize
+                - projectIndustry
+                - website
+                - twitterLink
+                - telegramLink
+                - projectCreatorName
+                - projectCreatorPosition
+                - email
+      responses:
+        201:
+          description: Squad invitation successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/TempCreatorSignupSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+
+  /invitation:
+    post:
+      summary: Send Invitation to the existing leader
+      tags:
+        - Invitation
+      requestBody:
+        description: Payload for creator signup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectId: 
+                  type: string
+                  example: 65fb3576d9ee382ad32ed982
+                leaderInvited: 
+                  type: string
+                  example: 65d833f9f6e9d597c9c00882
+
+      responses:
+        201:
+          description: Squad invitation successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/InvitationsSentSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        409:
+          description:  User Already exist
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/FieldAlreadyExist'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+
+
+  /users/leaders:
+    get:
+      summary: God Leasders List 
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          required: true
+          description: The numbers of items to return
+        # - in: query
+        #   name: orderField
+        #   schema:
+        #     type: string
+        #   description: apply sorting on this fields ("round", "salePrice", "startDate", "endDate")
+        # - in: query
+        #   name: orderDirection
+        #   schema:
+        #     type: string
+        #   description: sorting direction ascending,descending (1,-1)
+      responses:
+        201:
+          description: Signin Successful
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/LeadersListingSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+
+
+  /users/god-agents:
+    post:
+      summary: create god agent
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for god agent create
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: John
+                email: 
+                  type: string
+                  example: sijocet150@example.com
+                walletAddress: 
+                  type: string
+                  example: 0xab6fd6074782c805933d030e80129155a2156d57
+                myProjects:
+                  type: array
+                  items:
+                    type: string
+                    example: "65fb3576d9ee382ad32ed982"
+      responses:
+        201:
+          description: God Agent create successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/GodAgentCreateSuccess"
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/BadRequest"
+
+        409:
+          description: Email/Wallet Address already exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/EmailAlreadyExist"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/ServerError"
+  
+
+
+  /metadata/multipart-upload/init:
+    post:
+      summary: Initialize multipart upload
+      tags:
+        - metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for multiplart upload initialization
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  example: dumb.mp4
+                destination:
+                  type: string
+                  example: videos
+            required:
+              - destination
+              - fileName
+      responses:
+        201:
+          description: Video uploaded successfully
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/MultipartUploadInitSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+  /metadata/multipart-upload/presigned-urls:
+    post:
+      summary: Get presigned urls for  initialized multipart upload
+      tags:
+        - metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for multiplart upload presigned urls creation
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileKey:
+                  type: string
+                  example: dumb.mp4
+                fileId:
+                  type: string
+                  example: klfhadfshhdfajfdqdfsa
+                parts:
+                  type: number
+                  example: 4
+            required:
+              - fileKey
+              - fileId
+              - parts
+      responses:
+        201:
+          description: Presigned urls for multipart upload created successfully
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/MultipartUploadPresignedUrlsCreateSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+  /metadata/multipart-upload/finalize:
+    patch:
+      summary: Finalize multipart upload
+      tags:
+        - metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Payload for multiplart upload presigned urls creation
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileKey:
+                  type: string
+                  example: dumb.mp4
+                fileId:
+                  type: string
+                  example: klfhadfshhdfajfdqdfsa
+                parts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      PartNumber:
+                        type: string
+                        example: 1
+                      ETag:
+                        type: string
+                        example: abc 
+            required:
+              - fileKey
+              - fileId
+              - parts
+      responses:
+        200:
+          description: multipart upload finalized successfully
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/MultipartUploadFinalizeSuccess'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+  /metadata/upload-image:
+    post:
+      summary: Image Upload
+      tags:
+        - metadata
+      security:
+        - bearerAuth: []
+      
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: image
+          in: formData
+          description: The image file to upload
+          required: true
+          type: file
+      responses:
+        200:
+          description: multipart upload finalized successfully
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/ImageUploadedSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+  /metadata//upload-pdf:
+    post:
+      summary: Pdf Upload
+      tags:
+        - metadata
+      security:
+        - bearerAuth: []
+      
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: document
+          in: formData
+          description: The image file to upload
+          required: true
+          type: file
+      responses:
+        200:
+          description: multipart upload finalized successfully
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/ImageUploadedSuccessful'
+        400:
+          description: Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        401:
+          description:  JWT Expired/invalid
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/responses/UnAuthorized'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ServerError'
+  
+components:
+  securitySchemes:
+    bearerAuth:            
+      type: http
+      in: header
+      scheme: bearer
+      bearerFormat: JWT 
+  
+  responses:
+
+    EmailAlreadyExist:
+      summary: email already exist
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: email already exist
+        details:
+          example: null
+    CreatorsListingSuccess:
+      summary: Creators Listing Success
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Creators List
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: 6399ab0e84e0b5f46b53603b
+              fullName:
+                type: string
+                example: John Doe
+              username:
+                type: string
+                example: "john.doe"
+              profileImage:
+                type: string
+                example: "https://tomi-army.s3.amazonaws.com/1234de32ff43ee44bc12df111111.jpg"
+              subscribe:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                      example: 64515d467bfeb3c465b9b3cc
+    SubscribersListingSuccess:
+      summary: Subscribers Listing Success
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Subscribers List
+        data:
+          type: object
+          properties:
+            subscriptions:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: 6399ab0e84e0b5f46b53603b
+                  subscriber:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 6399ab0e84e0b5f46b53603b
+                      fullName:
+                        type: string
+                        example: John Doe
+                      profileImage:
+                        type: string
+                        example: "https://tomi-army.s3.amazonaws.com/1234de32ff43ee44bc12df111111.jpg"
+                  subscribedAt:
+                    type: string
+                    example: '2023-05-10T13:33:09.493Z'
+            count:
+              type: number
+              example: 2
+    Forbidden:
+      summary: Forbidden
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 403
+        message:
+          type: string
+          examples:
+            emailNotVerified:
+              value: 'Pending Email verification'
+            notAllowed:
+              value: "You don't have permission to access this endpoint"
+        details:
+          example: null
+    BadRequest:
+      summary: Bad Request (Api Payload validation failed)
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Validation Failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              "{payload_field}": 
+                type: string
+                example: "{payload_field} validation error message"
+    UnAuthorized:
+      summary: UnAuthorized
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: Jwt expired/invalid
+        details:
+          example: null
+    UserNotFound:
+      summary: User not found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: User not found
+        details:
+          example: null
+    ServerError:
+      summary: Internal Server Error
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: Something went wrong
+        details: 
+          example: null
+    TooManyRequest:
+      summary: To Many Requests
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 429
+        message:
+          type: string
+          example: to many requests
+    CreatorSignupSuccessful:
+      summary: Creator signup success
+      type: object
+      properties: 
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: Creator Signup Successful
+    TempCreatorSignupSuccessful:
+      summary: Creator signup success
+      type: object
+      properties: 
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: Creator Created
+    TempLeaderSignupSuccessful:
+      summary: Leader signup success
+      type: object
+      properties: 
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: Creator Created
+    FieldAlreadyExist:
+      summary: Respective Field Already Exist
+      type: object
+      properties: 
+        statusCode: 
+          type: integer
+          format: int32
+          example: 409
+        message: 
+          type: string
+          example: Fieldname already exist
+        details: 
+          type: string
+          format: nullable
+    MultipartUploadInitSuccess:
+      summary: Multipart initialization success
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 201
+        message:
+          type: string
+          examples: "Multipart upload initialized successfully"
+        data:
+          type: object
+          properties:
+            fileId:
+              type: string
+              example: 45efb32456bb43cc8765ff90Kkbdfvhbiefsva
+            fileKey:
+              type: string
+              example: dumb.mp4
+    MultipartUploadPresignedUrlsCreateSuccess:
+      summary: Multipart upload presigned url creation success
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 201
+        message:
+          type: string
+          examples: "Presigned parts urls created successfully"
+        data:
+          type: object
+          properties:
+            parts:
+              type: array
+              items:
+                type: object
+                properties:
+                  index:
+                    type: number
+                    example: 1
+                  signedUrl:
+                    type: string
+                    example: https://s3.amazonaws.com/45efb32456bb43cc8765ff90Kkbdfvhbiefsvamlkdnlfv.png
+    MultipartUploadFinalizeSuccess:
+      summary: Multipart Finalization success
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+          examples: "Multipart upload completed successfuly"
+        data:
+          type: object
+          properties:
+            fileUrl:
+              type: string
+              example: https://gems-s3.s3.amazonaws.com/dumb.mp4
+ 
+    CreatorSignInSuccessful:
+      summary: Creator Signin
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Signin Successful
+        data: 
+          type: object
+          properties: 
+            user: 
+              type: object
+              properties: 
+                _id: 
+                  type: string
+                  example: 65d833f9f6e9
+                name: 
+                  type: string
+                  example: abc2
+                email: 
+                  type: string
+                  example: mail@test.com
+                role: 
+                  type: string
+                  example: creator
+                walletAddress: 
+                  type: string
+                  example: 0xab6fd6074782
+            accessToken: 
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI
+            refreshToken: 
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
+ 
+    RefreshTokenSuccessful:
+      summary: Refreshtoken Success
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        messages: 
+          type: string
+          example: Access Token creation successful
+        data: 
+          type: object
+          properties: 
+            accessToken: 
+              type: string
+              example: eyJhbGciOiJIUzI1NNmOWY2ZTlkNTk3YzljMDA4ODIiLCJpc3MiOiJ0b21pZG9wLmNvbSJ9.LHwCVlB0e7W6sf38xaiZ1TpGgtTfXPpbWFtUEXqDntk
+ 
+    ProjectCreatedSuccess:
+      summary: Project Created Success
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        messages: 
+          type: string
+          example: Project create successful
+      
+    RoundCreatedSuccess:
+      summary: Round Created Success
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        messages: 
+          type: string
+          example: Round create successful
+      
+    ImageUploadedSuccessful:
+      summary: img/document uploaded successfuly
+      type: object
+      properties:
+        url: 
+          type: string
+          example: https://s3.amazonaws.com/45efb32456bb43cc8765ff90Kkbdfvhbiefsvamlkdnlfv.png
+          
+    ResetPasswordInitiationSuccess:
+      summary: Your Password has been successfuly changed.
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Your Password has been successfuly changed.
+
+    ForgotPasswordInitiationSuccess:
+      summary: Password reset link sent via email
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Password reset link sent via email
+    AddTokenSuccess:
+      summary: Password reset link sent via email
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: Token added successfully
+        data: 
+          type: object
+          properties: 
+            name: 
+              type: string
+              example: Ethereum
+            symbol: 
+              type: string
+              example: ETH
+            decimal: 
+              type: integer
+              format: int32
+              example: 1
+            address: 
+              type: string
+              example: 0x1234567890123456789012345678901234567891
+            slippage: 
+              type: integer
+              format: int32
+              example: 1
+            status: 
+              type: boolean
+            projectId: 
+              type: string
+              example: 65f33172cc2a28d67177ef70
+            imageUrl: 
+              type: string
+              example: fancy.com/qsw3/png
+            _id: 
+              type: string
+              example: 65fb0040088a34b631fc1d96
+            createdAt: 
+              type: string
+              format: date-time
+              example: 2024-03-20T15:26:56.423Z
+            updatedAt: 
+              type: string
+              format: date-time
+              example: 2024-03-20T15:26:56.423Z
+            __v: 
+              type: integer
+              format: int32
+              example: 0
+    AddressAlreadyExist:
+      summary: Address already exist
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: Address already exist
+        details:
+          example: null
+    AllTokensListing:
+      summary: Address already exist
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Tokens list
+        data: 
+          type: object
+          properties: 
+            count: 
+              type: integer
+              format: int32
+              example: 1
+            tokens: 
+              type: array
+              items: 
+                type: object
+                properties: 
+                  _id: 
+                    type: string
+                    example: 65fb0040088a34b631fc1d96
+                  name: 
+                    type: string
+                    example: Ethereum
+                  symbol: 
+                    type: string
+                    example: ETH
+                  decimal: 
+                    type: integer
+                    format: int32
+                    example: 1
+                  address: 
+                    type: string
+                    example: 0x1234567890123456789012345678901234567891
+                  slippage: 
+                    type: integer
+                    format: int32
+                    example: 1
+                  status: 
+                    type: boolean
+                  projectId: 
+                    type: string
+                    example: 65f33172cc2a28d67177ef70
+                  imageUrl: 
+                    type: string
+                    example: fancy.com/qsw3/png
+    ToggleStatusSuccess:
+      summary: Address already exist
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Toggle status successfully
+    TokenNotFound:
+      summary: Token not found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Token not found
+        details:
+          example: null 
+          
+    MinimalTokensListing:
+      summary: Token not found
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Minimal tokens list
+        data: 
+          type: array
+          items: 
+            type: object
+            properties: 
+              _id: 
+                type: string
+                example: 65fad378a77c57ce44120a6d
+              name: 
+                type: string
+                example: Bit Coin
+              symbol: 
+                type: string
+                example: BTC
+              address: 
+                type: string
+                example: 0x1234567890123456789012345678901234567890
+              imageUrl: 
+                type: string
+                example: fancy.com
+          
+    GetProjectDetailsForOwner:
+      summary: Token not found
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Projects list
+        data: 
+          type: object
+          properties: 
+            projects: 
+              type: array
+              items: 
+                type: object
+                properties: 
+                  _id: 
+                    type: string
+                    example: 65fb3576d9ee382ad32ed982
+                  projectOwner: 
+                    type: string
+                    example: 65fb1dbee57eab9dfaf62eec
+                  name: 
+                    type: string
+                    example: Project
+                  imageUrl: 
+                    type: string
+                    example: https://somethign.xom/7654321.png
+    ProjectNotFound:
+      summary: Project not found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: User not found
+        details:
+          example: null
+    RoundListingSuccess:
+      summary: Project not found
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Projects list
+        data: 
+          type: object
+          properties: 
+            count: 
+              type: integer
+              format: int32
+              example: 3
+            rounds: 
+              type: array
+              items: 
+                type: object
+                properties: 
+                  round: 
+                    type: integer
+                    format: int32
+                    example: 1
+                  salePrice: 
+                    type: integer
+                    format: int32
+                    example: 100
+                  startDate: 
+                    type: string
+                    format: date-time
+                    example: 2024-04-01T00:00:00.000Z
+                  endDate: 
+                    type: string
+                    format: date-time
+                    example: 2024-04-30T23:59:59.999Z
+            pages: 
+              type: integer
+              format: int32
+              example: 3
+    LeadersListingSuccess:
+      summary: Project not found
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 200
+        message: 
+          type: string
+          example: Leaders list
+        data: 
+          type: object
+          properties: 
+            count: 
+              type: integer
+              format: int32
+              example: 49
+            pages: 
+              type: integer
+              format: int32
+              example: 49
+            leaders: 
+              type: array
+              items: 
+                type: object
+                properties: 
+                  _id: 
+                    type: string
+                    example: 64d59282192f5e44e9c53093
+                  name: 
+                    type: string
+                    example: Eliran
+                  email: 
+                    type: string
+                    example: dev@dop.org
+                  role: 
+                    type: string
+                    example: god_agent
+                  walletAddress: 
+                    type: string
+                    example: 0x2f78ab0cd05c6f38b6affcdfa3028ada8b9b4569
+                  imgUrl: 
+                    type: string
+                    example: https://d20at1wqs76m77.cloudfront.net/userProfileImage/7f1336321ab0422da1c354633997c2bc.png
+    GodAgentCreateSuccess:
+      summary: Project not found
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: God agent created successfully
+
+       
+    InvitationsSentSuccessful:
+      summary: Invitation sent success
+      type: object
+      properties:
+        statusCode: 
+          type: integer
+          format: int32
+          example: 201
+        message: 
+          type: string
+          example: Invitation sent Successfully
+
+       
