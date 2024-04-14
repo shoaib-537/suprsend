@@ -7,10 +7,28 @@ const JWT = require("../common/auth/jwt");
 router.post(
   "/", 
   [
-    JWT.verifyAccessToken,
+    // JWT.verifyAccessToken,
 
   ],
   taskController.addTask
+)
+
+router.get(
+  "/", 
+  [
+    // JWT.verifyAccessToken,
+
+  ],
+  taskController.getAllTasks
+)
+
+router.delete(
+  "/:id", 
+  [
+    // JWT.verifyAccessToken,
+
+  ],
+  taskController.deleteTask
 )
 
 
