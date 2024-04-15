@@ -7,6 +7,8 @@ exports.addTask = async (addTaskDto, result = {}) => {
       ...addTaskDto,
     });
     const send = taskNotification.notificationFunction(response);
+    const sendReeminder1d = taskNotification.notificationReminderFunction(response);
+    const sendReeminder2h = taskNotification.notificationReminderHourFunction(response);
     result.data = response;
   } catch (ex) {
     if (
